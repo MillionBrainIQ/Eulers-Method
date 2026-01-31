@@ -1,45 +1,48 @@
-import math  # Provides math functions for use in ODE expressions
-from tabulate import tabulate  # Used to print results neatly in a table
+import math
+from tabulate import tabulate
 
-# Ask user for inputs
-dydx = input("\n\nWhat is the first order ODE?\n\t")  # The derivative dy/dx as a string
-x_0 = float(input("\nInitial x-condition?\n\t"))  # Starting x-value
-y_0 = float(input("\nInitial y-condition?\n\t"))  # Starting y-value
-final = float(input("\nWhat x value are we trying to approximate?\n\t"))  # Target x-value
-steps = int(input("\nHow many steps?\n\t"))  # Number of increments to reach final x
+# Create a safe evaluation environment for ODE input
+allowed_names = {k: getattr(math, k) for k in dir(math) if not k.startswith("__")}
+
+# Add some convenient shortcuts
+allowed_names["pi"] = math.pi
+allowed_names["e"] = math.e
+allowed_names["ln"] = math.log  # Allow ln(x) as a shortcut for natural log
+
+# Inputs
+dydx = input("Enter the first order ODE (use x and y, functions like sin, cos, exp, ln allowed):\n\t")
+x_0 = float(input("\nInitial x-condition?\n\t"))
+y_0 = float(input("\nInitial y-condition?\n\t"))
+final = float(input("\nWhat x value are we trying to approximate?\n\t"))
+steps = int(input("\nHow many steps?\n\t"))
 
 def Euler_Method(dy_dx, x, y, final_x, s):
-    """
-    Approximates the solution of a first-order ODE using Euler's Method.
-    """
-    h = (final_x - x) / s  # Step size: distance between successive x-values
-    table = []  # Stores rows for the output table
+    h = (final_x - x) / s
+    table = []
 
     for i in range(s):
-        # Evaluate the derivative at current x and y using eval
-        m = eval(dy_dx, {"x": x, "y": y, "math": math})  
-        
-        # Calculate next y using Euler's formula
-        y_next = y + m * h  
-        
-        # Create equation of tangent line at current point
-        line_eq = f"y = {m}(x - {x}) + {y}"  
-        
-        # Add current step data to table
-        table.append([x, y, m, line_eq, y_next])
-        
-        # Update x and y for next iteration
-        y = y_next
+        # Update x and y in the allowed_names dict
+        allowed_names["x"] = x
+        allowed_names["y"] = y
+
+        # Safe evaluation with error handling
+        try:
+            m = eval(dy_dx, allowed_names)
+        except Exception as e:
+            print(f"Error evaluating ODE at step {i+1}: {e}")
+            break
+
+        y_next = y + m * h
+        line_eq = f"y = {m}(x - {x}) + {y}"  # tangent line (just for display)
+
+        table.append([i+1, x, y, m, line_eq, y_next])
+
         x += h
+        y = y_next
 
-    # Table headers for clarity
-    headers = ["x", "y", "dy/dx", "tangent line", "y(x + h)"]
-
-    # Print results in a formatted table
-    print(tabulate(table, headers=headers, floatfmt=".4f", tablefmt="fancy_grid"))
-    
-    # Print final y-approximation at target x
+    headers = ["Step", "x", "y", "dy/dx", "Tangent line", "y(x + h)"]
+    print(tabulate(table, headers=headers, floatfmt=".5f", tablefmt="fancy_grid"))
     print("\nFinal approximation:", round(y, 6))
 
-# Run Euler's Method with user inputs
 Euler_Method(dydx, x_0, y_0, final, steps)
+

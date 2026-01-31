@@ -1,4 +1,5 @@
 import math
+import sys
 from tabulate import tabulate
 
 # Create a safe evaluation environment for ODE input
@@ -46,3 +47,4 @@ def Euler_Method(dy_dx, x, y, final_x, s):
 
 Euler_Method(dydx, x_0, y_0, final, steps)
 
+sys.exit()

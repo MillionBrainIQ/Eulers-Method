@@ -11,7 +11,7 @@ allowed_names["e"] = math.e
 allowed_names["ln"] = math.log  # Allow ln(x) as a shortcut for natural log
 
 # Inputs
-dydx = input("Enter the first order ODE:\n\t")
+dydx = input("\nEnter the first order ODE:\n\t")
 x_0 = float(input("\nInitial x-condition?\n\t"))
 y_0 = float(input("\nInitial y-condition?\n\t"))
 final = float(input("\nWhat x value are we trying to approximate?\n\t"))
